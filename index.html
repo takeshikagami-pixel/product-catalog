@@ -1,0 +1,181 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Recommended products for overseas sales teams.">
+  <title>Recommended Products | Sales Catalog</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#" aria-label="Product catalog home">
+        <span class="brand-mark">P</span>
+        <span class="brand-text">
+          <strong>PRODUCT CATALOG</strong>
+          <small>INTERNAL SALES SUPPORT</small>
+        </span>
+      </a>
+      <span class="internal-label">INTERNAL USE</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-content">
+        <p class="eyebrow">SELECTED BY OUR JAPAN TEAM</p>
+        <h1>Products worth<br>introducing.</h1>
+        <p class="hero-description">
+          Explore our recommended products and discover opportunities
+          to introduce them to your local customers.
+        </p>
+        <a class="hero-link" href="#catalog">
+          Explore products <span aria-hidden="true">↓</span>
+        </a>
+      </div>
+      <div class="hero-decoration" aria-hidden="true">
+        <div class="decoration-circle circle-one"></div>
+        <div class="decoration-circle circle-two"></div>
+        <div class="decoration-card">
+          <span class="decoration-label">JAPAN TEAM PICK</span>
+          <span class="decoration-title">Quality products.<br>New opportunities.</span>
+          <span class="decoration-line"></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="intro-strip">
+      <div class="intro-item">
+        <span class="intro-number">01</span>
+        <div>
+          <strong>Explore</strong>
+          <p>Browse recommended products.</p>
+        </div>
+      </div>
+      <div class="intro-item">
+        <span class="intro-number">02</span>
+        <div>
+          <strong>Understand</strong>
+          <p>Review applications and key points.</p>
+        </div>
+      </div>
+      <div class="intro-item">
+        <span class="intro-number">03</span>
+        <div>
+          <strong>Introduce</strong>
+          <p>Find products for local customers.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="catalog-section" id="catalog">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">OUR PRODUCT SELECTION</p>
+          <h2>Recommended products</h2>
+          <p class="section-description">
+            Products selected by the Japan team for potential
+            sales opportunities in your market.
+          </p>
+        </div>
+        <div class="catalog-count">
+          <strong id="resultCount">0</strong>
+          <span>PRODUCTS</span>
+        </div>
+      </div>
+
+      <div class="filter-panel">
+        <div class="search-box">
+          <label for="searchInput">Search products</label>
+          <input
+            id="searchInput"
+            type="search"
+            placeholder="Search name, part number, application..."
+          >
+        </div>
+
+        <div class="filter-control">
+          <label for="categoryFilter">Category</label>
+          <select id="categoryFilter">
+            <option value="">All categories</option>
+          </select>
+        </div>
+
+        <div class="filter-control">
+          <label for="manufacturerFilter">Manufacturer</label>
+          <select id="manufacturerFilter">
+            <option value="">All manufacturers</option>
+          </select>
+        </div>
+
+        <div class="filter-control">
+          <label for="sortSelect">Sort by</label>
+          <select id="sortSelect">
+            <option value="featured">Featured first</option>
+            <option value="name">Product name</option>
+            <option value="manufacturer">Manufacturer</option>
+          </select>
+        </div>
+
+        <button class="reset-button" id="resetFilters" type="button">
+          Reset filters
+        </button>
+      </div>
+
+      <div id="productGrid" class="product-grid"></div>
+
+      <div id="emptyState" class="empty-state" hidden>
+        <div class="empty-icon" aria-hidden="true">⌕</div>
+        <h3>No products found</h3>
+        <p>Try a different keyword or change your filters.</p>
+        <button class="button button-dark" id="emptyReset" type="button">
+          Clear filters
+        </button>
+      </div>
+    </section>
+
+    <section class="sales-note">
+      <div class="sales-note-icon" aria-hidden="true">✳</div>
+      <div>
+        <h2>Know a potential customer?</h2>
+        <p>
+          Review the product details and manufacturer documents
+          before introducing a product. Confirm specifications,
+          pricing, availability, and suitability for the customer's
+          requirements before making a proposal.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span class="footer-brand">PRODUCT CATALOG</span>
+      <span>Internal sales support · For business use</span>
+    </div>
+  </footer>
+
+  <div
+    id="productModal"
+    class="modal-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modalTitle"
+    hidden
+  >
+    <div class="modal-dialog">
+      <button
+        class="modal-close"
+        type="button"
+        data-close-modal
+        aria-label="Close product details"
+      >×</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+</body>
+</html>
