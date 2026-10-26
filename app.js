@@ -267,12 +267,16 @@ function getFilteredProducts() {
       !selectedManufacturer ||
       product.manufacturer === selectedManufacturer;
 
-    return matchesSearch && matchesCategory && matchesManufacturer;
+    return matchesSearch &&
+      matchesCategory &&
+      matchesManufacturer;
   });
 
   switch (sortSelect.value) {
     case "name":
-      filtered.sort((a, b) => a.name.localeCompare(b.name));
+      filtered.sort((a, b) =>
+        a.name.localeCompare(b.name)
+      );
       break;
 
     case "manufacturer":
@@ -325,6 +329,8 @@ function renderProductCard(product) {
             class="details-button"
             type="button"
             data-product-id="${escapeHtml(product.id)}"
+            data-s4u-event="detail-${escapeHtml(product.id)}"
+            data-s4u-id="7329541183"
             aria-label="View details for ${escapeHtml(product.name)}"
           >View details</button>
         </div>
@@ -359,35 +365,7 @@ function renderProducts() {
 }
 
 // ========================================
-// 8. STATS4U PRODUCT EVENT TRACKING
-// ========================================
-
-// Track product-detail views.
-// Example event names: detail-p001, detail-p002, etc.
-
-function trackProductDetail(product) {
-  const eventName = "detail-" + product.id;
-
-  try {
-    if (
-      typeof s4u !== "undefined" &&
-      s4u &&
-      typeof s4u.event === "function"
-    ) {
-      s4u.event(eventName, "7329541183");
-      console.log("Stats4U event sent:", eventName);
-    } else {
-      console.warn(
-        "Stats4U event function is not available."
-      );
-    }
-  } catch (error) {
-    console.error("Stats4U tracking error:", error);
-  }
-}
-
-// ========================================
-// 9. PRODUCT DETAILS
+// 8. PRODUCT DETAILS
 // ========================================
 
 function openProductDetails(productId) {
@@ -396,9 +374,6 @@ function openProductDetails(productId) {
   );
 
   if (!product) return;
-
-  // Record this product's detail view.
-  trackProductDetail(product);
 
   const applications = (product.applications || [])
     .map((item) => `<li>${escapeHtml(item)}</li>`)
@@ -490,7 +465,7 @@ function openProductDetails(productId) {
 }
 
 // ========================================
-// 10. CLOSE DETAILS
+// 9. CLOSE DETAILS
 // ========================================
 
 function closeModal() {
@@ -499,7 +474,7 @@ function closeModal() {
 }
 
 // ========================================
-// 11. RESET FILTERS
+// 10. RESET FILTERS
 // ========================================
 
 function resetFilters() {
@@ -511,7 +486,7 @@ function resetFilters() {
 }
 
 // ========================================
-// 12. EVENT LISTENERS
+// 11. EVENT LISTENERS
 // ========================================
 
 searchInput.addEventListener("input", renderProducts);
@@ -524,7 +499,9 @@ $("emptyReset").addEventListener("click", resetFilters);
 
 productGrid.addEventListener("click", (event) => {
   const button = event.target.closest("[data-product-id]");
-  if (button) openProductDetails(button.dataset.productId);
+  if (button) {
+    openProductDetails(button.dataset.productId);
+  }
 });
 
 modal.addEventListener("click", (event) => {
@@ -543,7 +520,7 @@ document.addEventListener("keydown", (event) => {
 });
 
 // ========================================
-// 13. INITIALIZE
+// 12. INITIALIZE
 // ========================================
 
 populateFilters();
