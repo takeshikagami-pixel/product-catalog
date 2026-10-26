@@ -1,9 +1,8 @@
+
 "use strict";
 
 /*
  * PRODUCT CATALOG
- * Internal sales support for overseas branches.
- *
  * Images: images/
  * PDF documents: documents/
  */
@@ -41,7 +40,6 @@ const products = [
     targetCustomers:
       "Manufacturers and factories using pneumatic equipment."
   },
-
   {
     id: "p002",
     name: "Switching Power Supply",
@@ -68,7 +66,6 @@ const products = [
     ],
     targetCustomers: "Manufacturers and system integrators."
   },
-
   {
     id: "p003",
     name: "Relay Socket",
@@ -96,7 +93,6 @@ const products = [
     ],
     targetCustomers: "Factories and control panel builders."
   },
-
   {
     id: "p004",
     name: "Digital Pressure Switch",
@@ -125,7 +121,6 @@ const products = [
     targetCustomers:
       "Equipment manufacturers and factory automation teams."
   },
-
   {
     id: "p005",
     name: "Tower Lamp Base",
@@ -149,7 +144,6 @@ const products = [
     targetCustomers:
       "Factories and industrial equipment manufacturers."
   },
-
   {
     id: "p006",
     name: "DC24V Relay",
@@ -280,11 +274,13 @@ function getFilteredProducts() {
     case "name":
       filtered.sort((a, b) => a.name.localeCompare(b.name));
       break;
+
     case "manufacturer":
       filtered.sort((a, b) =>
         a.manufacturer.localeCompare(b.manufacturer)
       );
       break;
+
     default:
       filtered.sort((a, b) =>
         Number(b.featured) - Number(a.featured) ||
@@ -363,7 +359,27 @@ function renderProducts() {
 }
 
 // ========================================
-// 8. PRODUCT DETAILS
+// 8. STATS4U PRODUCT EVENT TRACKING
+// ========================================
+
+// Record a product-detail view in Stats4U.
+// Product IDs are p001, p002, etc.
+// The resulting event names are detail-p001, detail-p002, etc.
+// The counter ID is the existing Stats4U counter.
+
+function trackProductDetail(product) {
+  const eventName = "detail-" + product.id;
+
+  if (
+    window.s4u &&
+    typeof window.s4u.event === "function"
+  ) {
+    window.s4u.event(eventName, "7329541183");
+  }
+}
+
+// ========================================
+// 9. PRODUCT DETAILS
 // ========================================
 
 function openProductDetails(productId) {
@@ -372,6 +388,9 @@ function openProductDetails(productId) {
   );
 
   if (!product) return;
+
+  // Record this product's detail view.
+  trackProductDetail(product);
 
   const applications = (product.applications || [])
     .map((item) => `<li>${escapeHtml(item)}</li>`)
@@ -448,6 +467,7 @@ function openProductDetails(productId) {
   `;
 
   const modalImage = modalContent.querySelector(".modal-product-image");
+
   if (modalImage) {
     modalImage.addEventListener("error", () => {
       modalImage.hidden = true;
@@ -462,7 +482,7 @@ function openProductDetails(productId) {
 }
 
 // ========================================
-// 9. CLOSE DETAILS
+// 10. CLOSE DETAILS
 // ========================================
 
 function closeModal() {
@@ -471,7 +491,7 @@ function closeModal() {
 }
 
 // ========================================
-// 10. RESET FILTERS
+// 11. RESET FILTERS
 // ========================================
 
 function resetFilters() {
@@ -483,7 +503,7 @@ function resetFilters() {
 }
 
 // ========================================
-// 11. EVENT LISTENERS
+// 12. EVENT LISTENERS
 // ========================================
 
 searchInput.addEventListener("input", renderProducts);
@@ -509,11 +529,13 @@ modal.addEventListener("click", (event) => {
 });
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && !modal.hidden) closeModal();
+  if (event.key === "Escape" && !modal.hidden) {
+    closeModal();
+  }
 });
 
 // ========================================
-// 12. INITIALIZE
+// 13. INITIALIZE
 // ========================================
 
 populateFilters();
