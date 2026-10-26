@@ -1,4 +1,3 @@
-
 "use strict";
 
 /*
@@ -7,9 +6,6 @@
  *
  * Images: images/
  * PDF documents: documents/
- *
- * Replace sample product data with verified information
- * before sharing this catalog with overseas colleagues.
  */
 
 // ========================================
@@ -25,8 +21,8 @@ const products = [
     category: "Pneumatic Components",
     featured: true,
     status: "active",
-    updatedAt: "2026-10-23",
-    image: "images/precision-regulator.jpg",
+    updatedAt: "2026-10-26",
+    image: "images/ckd-rp1000.jpg",
     tone: "tone-teal",
     documents: [
       {
@@ -63,16 +59,14 @@ const products = [
         file: "documents/switching-power-supply-catalog.pdf"
       }
     ],
-    description:
-      "An industrial switching power supply product.",
+    description: "An industrial switching power supply product.",
     recommendation:
       "A candidate product for customers looking for industrial power supply solutions. Verify electrical requirements and the exact model before making a proposal.",
     applications: [
       "Industrial control equipment",
       "Electrical equipment"
     ],
-    targetCustomers:
-      "Manufacturers and system integrators."
+    targetCustomers: "Manufacturers and system integrators."
   },
 
   {
@@ -100,8 +94,7 @@ const products = [
       "Industrial control panels",
       "Relay-based control systems"
     ],
-    targetCustomers:
-      "Factories and control panel builders."
+    targetCustomers: "Factories and control panel builders."
   },
 
   {
@@ -182,7 +175,6 @@ const products = [
   }
 ];
 
-
 // ========================================
 // 2. ELEMENTS
 // ========================================
@@ -198,7 +190,6 @@ const resultCount = $("resultCount");
 const emptyState = $("emptyState");
 const modal = $("productModal");
 const modalContent = $("modalContent");
-
 
 // ========================================
 // 3. SAFE HTML OUTPUT
@@ -219,7 +210,6 @@ function getActiveProducts() {
     (product) => product.status === "active"
   );
 }
-
 
 // ========================================
 // 4. FILTER DROPDOWNS
@@ -250,7 +240,6 @@ function populateFilters() {
     manufacturerFilter.appendChild(option);
   });
 }
-
 
 // ========================================
 // 5. SEARCH, FILTER, AND SORT
@@ -284,26 +273,18 @@ function getFilteredProducts() {
       !selectedManufacturer ||
       product.manufacturer === selectedManufacturer;
 
-    return (
-      matchesSearch &&
-      matchesCategory &&
-      matchesManufacturer
-    );
+    return matchesSearch && matchesCategory && matchesManufacturer;
   });
 
   switch (sortSelect.value) {
     case "name":
-      filtered.sort((a, b) =>
-        a.name.localeCompare(b.name)
-      );
+      filtered.sort((a, b) => a.name.localeCompare(b.name));
       break;
-
     case "manufacturer":
       filtered.sort((a, b) =>
         a.manufacturer.localeCompare(b.manufacturer)
       );
       break;
-
     default:
       filtered.sort((a, b) =>
         Number(b.featured) - Number(a.featured) ||
@@ -313,7 +294,6 @@ function getFilteredProducts() {
 
   return filtered;
 }
-
 
 // ========================================
 // 6. PRODUCT CARD TEMPLATE
@@ -326,62 +306,36 @@ function renderProductCard(product) {
 
   return `
     <article class="product-card">
-
       <div class="product-art ${escapeHtml(product.tone || "tone-blue")}">
-
         ${featuredBadge}
-
         <img
           class="catalog-product-image"
           src="${escapeHtml(product.image || "")}"
           alt="${escapeHtml(product.name)}"
           loading="lazy"
         >
-
         <span class="product-symbol" hidden aria-hidden="true">
           ${escapeHtml(product.name.slice(0, 2).toUpperCase())}
         </span>
-
       </div>
-
       <div class="product-content">
-
-        <p class="product-maker">
-          ${escapeHtml(product.manufacturer)}
-        </p>
-
-        <h3 class="product-name">
-          ${escapeHtml(product.name)}
-        </h3>
-
-        <p class="product-part">
-          Part No. ${escapeHtml(product.partNumber)}
-        </p>
-
-        <p class="product-category">
-          ${escapeHtml(product.category)}
-        </p>
-
-        <p class="product-recommendation">
-          ${escapeHtml(product.recommendation)}
-        </p>
-
+        <p class="product-maker">${escapeHtml(product.manufacturer)}</p>
+        <h3 class="product-name">${escapeHtml(product.name)}</h3>
+        <p class="product-part">Part No. ${escapeHtml(product.partNumber)}</p>
+        <p class="product-category">${escapeHtml(product.category)}</p>
+        <p class="product-recommendation">${escapeHtml(product.recommendation)}</p>
         <div class="product-meta">
           <button
             class="details-button"
             type="button"
             data-product-id="${escapeHtml(product.id)}"
             aria-label="View details for ${escapeHtml(product.name)}"
-          >
-            View details
-          </button>
+          >View details</button>
         </div>
-
       </div>
     </article>
   `;
 }
-
 
 // ========================================
 // 7. RENDER PRODUCT LIST
@@ -391,7 +345,6 @@ function renderProducts() {
   const filteredProducts = getFilteredProducts();
 
   resultCount.textContent = filteredProducts.length;
-
   emptyState.hidden = filteredProducts.length > 0;
   productGrid.hidden = filteredProducts.length === 0;
 
@@ -399,20 +352,15 @@ function renderProducts() {
     .map(renderProductCard)
     .join("");
 
-  // Show a text fallback when an image cannot be loaded.
   productGrid.querySelectorAll(".catalog-product-image")
     .forEach((img) => {
       img.addEventListener("error", () => {
         img.hidden = true;
-
         const fallback = img.nextElementSibling;
-        if (fallback) {
-          fallback.hidden = false;
-        }
+        if (fallback) fallback.hidden = false;
       }, { once: true });
     });
 }
-
 
 // ========================================
 // 8. PRODUCT DETAILS
@@ -432,12 +380,10 @@ function openProductDetails(productId) {
   const documents = (product.documents || [])
     .map((doc) => `
       <li>
-        <a
-          class="document-link"
-          href="${escapeHtml(doc.file)}"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <a class="document-link"
+           href="${escapeHtml(doc.file)}"
+           target="_blank"
+           rel="noopener noreferrer">
           <span aria-hidden="true">📄</span>
           <span>${escapeHtml(doc.title)}</span>
           <span aria-hidden="true">↗</span>
@@ -456,98 +402,52 @@ function openProductDetails(productId) {
     : `
       <section class="detail-section">
         <h3>Product Documents</h3>
-        <p class="no-documents">
-          Documents have not been added yet.
-        </p>
+        <p class="no-documents">Documents have not been added yet.</p>
       </section>
     `;
 
   modalContent.innerHTML = `
     <div class="modal-top">
-
       <div class="modal-art ${escapeHtml(product.tone || "tone-blue")}">
-        <img
-          class="modal-product-image"
-          src="${escapeHtml(product.image || "")}"
-          alt="${escapeHtml(product.name)}"
-        >
+        <img class="modal-product-image"
+             src="${escapeHtml(product.image || "")}"
+             alt="${escapeHtml(product.name)}">
       </div>
-
       <div class="modal-heading">
-
         <p class="modal-maker">
-          ${escapeHtml(product.manufacturer)}
-          ·
-          ${escapeHtml(product.category)}
+          ${escapeHtml(product.manufacturer)} · ${escapeHtml(product.category)}
         </p>
-
-        <h2 id="modalTitle">
-          ${escapeHtml(product.name)}
-        </h2>
-
-        <p class="modal-part">
-          Part No. ${escapeHtml(product.partNumber)}
-        </p>
-
-        ${product.featured
-          ? '<span class="featured-badge">FEATURED PRODUCT</span>'
-          : ""}
-
+        <h2 id="modalTitle">${escapeHtml(product.name)}</h2>
+        <p class="modal-part">Part No. ${escapeHtml(product.partNumber)}</p>
+        ${product.featured ? '<span class="featured-badge">FEATURED PRODUCT</span>' : ""}
       </div>
     </div>
-
     <section class="detail-section">
       <h3>Product Overview</h3>
-      <p class="modal-description">
-        ${escapeHtml(product.description)}
-      </p>
+      <p class="modal-description">${escapeHtml(product.description)}</p>
     </section>
-
     <section class="detail-section">
       <h3>Why We Recommend It</h3>
-      <p class="modal-description">
-        ${escapeHtml(product.recommendation)}
-      </p>
+      <p class="modal-description">${escapeHtml(product.recommendation)}</p>
     </section>
-
     <section class="detail-section">
       <h3>Typical Applications</h3>
-      <ul class="application-list">
-        ${applications}
-      </ul>
+      <ul class="application-list">${applications}</ul>
     </section>
-
     <section class="detail-section">
       <h3>Target Customers</h3>
-      <p class="modal-description">
-        ${escapeHtml(
-          product.targetCustomers || "To be confirmed."
-        )}
-      </p>
+      <p class="modal-description">${escapeHtml(product.targetCustomers || "To be confirmed.")}</p>
     </section>
-
     ${documentSection}
-
     <section class="detail-section">
-      <p class="last-updated">
-        Last updated: ${escapeHtml(product.updatedAt || "Not specified")}
-      </p>
+      <p class="last-updated">Last updated: ${escapeHtml(product.updatedAt || "Not specified")}</p>
     </section>
-
     <div class="modal-actions">
-      <button
-        class="button button-dark"
-        type="button"
-        data-close-modal
-      >
-        Close
-      </button>
+      <button class="button button-dark" type="button" data-close-modal>Close</button>
     </div>
   `;
 
-  // Handle missing product photos in the detail window.
   const modalImage = modalContent.querySelector(".modal-product-image");
-
   if (modalImage) {
     modalImage.addEventListener("error", () => {
       modalImage.hidden = true;
@@ -558,11 +458,8 @@ function openProductDetails(productId) {
   document.body.style.overflow = "hidden";
 
   const closeButton = modal.querySelector(".modal-close");
-  if (closeButton) {
-    closeButton.focus();
-  }
+  if (closeButton) closeButton.focus();
 }
-
 
 // ========================================
 // 9. CLOSE DETAILS
@@ -573,7 +470,6 @@ function closeModal() {
   document.body.style.overflow = "";
 }
 
-
 // ========================================
 // 10. RESET FILTERS
 // ========================================
@@ -583,10 +479,8 @@ function resetFilters() {
   categoryFilter.value = "";
   manufacturerFilter.value = "";
   sortSelect.value = "featured";
-
   renderProducts();
 }
-
 
 // ========================================
 // 11. EVENT LISTENERS
@@ -602,10 +496,7 @@ $("emptyReset").addEventListener("click", resetFilters);
 
 productGrid.addEventListener("click", (event) => {
   const button = event.target.closest("[data-product-id]");
-
-  if (button) {
-    openProductDetails(button.dataset.productId);
-  }
+  if (button) openProductDetails(button.dataset.productId);
 });
 
 modal.addEventListener("click", (event) => {
@@ -618,11 +509,8 @@ modal.addEventListener("click", (event) => {
 });
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && !modal.hidden) {
-    closeModal();
-  }
+  if (event.key === "Escape" && !modal.hidden) closeModal();
 });
-
 
 // ========================================
 // 12. INITIALIZE
