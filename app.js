@@ -362,19 +362,27 @@ function renderProducts() {
 // 8. STATS4U PRODUCT EVENT TRACKING
 // ========================================
 
-// Record a product-detail view in Stats4U.
-// Product IDs are p001, p002, etc.
-// The resulting event names are detail-p001, detail-p002, etc.
-// The counter ID is the existing Stats4U counter.
+// Track product-detail views.
+// Example event names: detail-p001, detail-p002, etc.
 
 function trackProductDetail(product) {
   const eventName = "detail-" + product.id;
 
-  if (
-    window.s4u &&
-    typeof window.s4u.event === "function"
-  ) {
-    window.s4u.event(eventName, "7329541183");
+  try {
+    if (
+      typeof s4u !== "undefined" &&
+      s4u &&
+      typeof s4u.event === "function"
+    ) {
+      s4u.event(eventName, "7329541183");
+      console.log("Stats4U event sent:", eventName);
+    } else {
+      console.warn(
+        "Stats4U event function is not available."
+      );
+    }
+  } catch (error) {
+    console.error("Stats4U tracking error:", error);
   }
 }
 
