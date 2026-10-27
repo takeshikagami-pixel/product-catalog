@@ -2,7 +2,9 @@
 "use strict";
 
 /*
- * PRODUCT CATALOG
+ * INJ RECOMMENDED PRODUCTS FOR INP
+ * INJ: ITO NOBU INDUSTRIAL (Japan)
+ * INP: ITO NOBU PHILIPPINES
  * Images: images/
  * PDF documents: documents/
  */
@@ -32,7 +34,7 @@ const products = [
     description:
       "A precision regulator for industrial pneumatic applications.",
     recommendation:
-      "Selected by the Japan team as a product worth introducing to overseas customers. Confirm the exact model and specifications before proposing it.",
+      "Recommended by INJ for INP to consider introducing to suitable customers. Confirm the exact model and specifications before proposing it.",
     applications: [
       "Industrial pneumatic systems",
       "Equipment requiring pressure regulation"
@@ -59,7 +61,7 @@ const products = [
     ],
     description: "An industrial switching power supply product.",
     recommendation:
-      "A candidate product for customers looking for industrial power supply solutions. Verify electrical requirements and the exact model before making a proposal.",
+      "Recommended by INJ for INP to consider for customers looking for industrial power supply solutions. Verify electrical requirements and the exact model before making a proposal.",
     applications: [
       "Industrial control equipment",
       "Electrical equipment"
@@ -86,7 +88,7 @@ const products = [
     description:
       "A relay socket for compatible industrial relay applications.",
     recommendation:
-      "Consider introducing this product to customers who use compatible relay systems. Confirm the relay model and mounting requirements.",
+      "INJ recommends that INP consider introducing this product to customers who use compatible relay systems. Confirm the relay model and mounting requirements.",
     applications: [
       "Industrial control panels",
       "Relay-based control systems"
@@ -113,7 +115,7 @@ const products = [
     description:
       "A digital pressure switch for pressure monitoring applications.",
     recommendation:
-      "A potential product for customers looking to monitor pressure in industrial equipment. Check the required range, connections, and output specifications.",
+      "Recommended by INJ for INP to consider for customers looking to monitor pressure in industrial equipment. Check the required range, connections, and output specifications.",
     applications: [
       "Pressure monitoring",
       "Industrial automation"
@@ -136,7 +138,7 @@ const products = [
     description:
       "A tower lamp base component. Verify the manufacturer and compatible product series before introducing it to customers.",
     recommendation:
-      "Consider this item for customers who use industrial signal lamps. Confirm compatibility and voltage requirements before proposing it.",
+      "INJ recommends that INP consider this item for customers who use industrial signal lamps. Confirm compatibility and voltage requirements before proposing it.",
     applications: [
       "Industrial status indication",
       "Equipment signal lamps"
@@ -159,7 +161,7 @@ const products = [
     description:
       "A DC24V relay product for compatible control applications.",
     recommendation:
-      "Consider introducing this relay to customers who use compatible control circuits. Verify the exact model, coil voltage, and contact configuration.",
+      "Recommended by INJ for INP to consider for customers using compatible control circuits. Verify the exact model, coil voltage, and contact configuration.",
     applications: [
       "Industrial control circuits",
       "Control panels"
@@ -274,8 +276,15 @@ function getFilteredProducts() {
 
   switch (sortSelect.value) {
     case "name":
+    case "name-asc":
       filtered.sort((a, b) =>
         a.name.localeCompare(b.name)
+      );
+      break;
+
+    case "name-desc":
+      filtered.sort((a, b) =>
+        b.name.localeCompare(a.name)
       );
       break;
 
@@ -301,7 +310,7 @@ function getFilteredProducts() {
 
 function renderProductCard(product) {
   const featuredBadge = product.featured
-    ? '<span class="featured-badge">FEATURED</span>'
+    ? '<span class="featured-badge">RECOMMENDED BY INJ</span>'
     : "";
 
   return `
@@ -329,8 +338,6 @@ function renderProductCard(product) {
             class="details-button"
             type="button"
             data-product-id="${escapeHtml(product.id)}"
-            data-s4u-event="detail-${escapeHtml(product.id)}"
-            data-s4u-id="7329541183"
             aria-label="View details for ${escapeHtml(product.name)}"
           >View details</button>
         </div>
@@ -421,7 +428,7 @@ function openProductDetails(productId) {
         </p>
         <h2 id="modalTitle">${escapeHtml(product.name)}</h2>
         <p class="modal-part">Part No. ${escapeHtml(product.partNumber)}</p>
-        ${product.featured ? '<span class="featured-badge">FEATURED PRODUCT</span>' : ""}
+        ${product.featured ? '<span class="featured-badge">RECOMMENDED BY INJ</span>' : ""}
       </div>
     </div>
     <section class="detail-section">
@@ -429,7 +436,7 @@ function openProductDetails(productId) {
       <p class="modal-description">${escapeHtml(product.description)}</p>
     </section>
     <section class="detail-section">
-      <h3>Why We Recommend It</h3>
+      <h3>INJ Recommendation for INP</h3>
       <p class="modal-description">${escapeHtml(product.recommendation)}</p>
     </section>
     <section class="detail-section">
@@ -481,7 +488,10 @@ function resetFilters() {
   searchInput.value = "";
   categoryFilter.value = "";
   manufacturerFilter.value = "";
-  sortSelect.value = "featured";
+
+  // Restore the default recommendation order.
+  sortSelect.selectedIndex = 0;
+
   renderProducts();
 }
 
@@ -499,6 +509,7 @@ $("emptyReset").addEventListener("click", resetFilters);
 
 productGrid.addEventListener("click", (event) => {
   const button = event.target.closest("[data-product-id]");
+
   if (button) {
     openProductDetails(button.dataset.productId);
   }
