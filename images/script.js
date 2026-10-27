@@ -6,7 +6,7 @@
 
 // Google Apps Script の Web アプリ URL を設定してください。
 // 空欄のままでは Google スプレッドシートに記録されません。
-const GAS_ENDPOINT_URL = "";
+const GAS_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbzdKdiWEXlX2jpbPtTXEmPcr7L_ZbeNhoWl_8wvYijOLvVuKGGxWsAPqWn9twqsLY6A3g/exec";
 
 // ブラウザごとの商品閲覧回数を保存するキー
 const STORAGE_KEY = "catalog_click_counts";
