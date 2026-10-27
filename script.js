@@ -1,12 +1,11 @@
 
-// ========================================
+ // ========================================
 // Product Catalog Functionality
 // INJ Recommendations for INP
 // ========================================
 
-// Google Apps Script の Web アプリ URL を設定してください。
-// 空欄のままでは Google スプレッドシートに記録されません。
-const GAS_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbzdKdiWEXlX2jpbPtTXEmPcr7L_ZbeNhoWl_8wvYijOLvVuKGGxWsAPqWn9twqsLY6A3g/exec";
+// Google Apps Script Web アプリ URL
+const GAS_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbxxRPOPCQ9nLHz0YhacP4-sBrPL2WengyOONKfYMu9VsV-8Xv5uL_ZlpZIwvMlYlY7AYw/exec";
 
 // ブラウザごとの商品閲覧回数を保存するキー
 const STORAGE_KEY = "catalog_click_counts";
@@ -66,23 +65,20 @@ function sendClickToSpreadsheet(product) {
     return;
   }
 
-  const payload = {
-    timestamp: new Date().toISOString(),
-    productId: product.id,
-    productName: product.name,
-    category: product.category,
-    manufacturer: product.manufacturer
-  };
+  // Apps Script の e.parameter で受け取れる形式にする
+  const payload = new URLSearchParams({
+    productId: String(product.id ?? ""),
+    productName: String(product.name ?? ""),
+    category: String(product.category ?? ""),
+    manufacturer: String(product.manufacturer ?? "")
+  });
 
-  // no-cors ではレスポンスの成否を読み取れません。
-  // 記録結果は Google スプレッドシート側で確認してください。
+  // no-cors ではレスポンス内容を読み取れません。
+  // 記録されたかどうかは Google スプレッドシートで確認してください。
   fetch(GAS_ENDPOINT_URL, {
     method: "POST",
     mode: "no-cors",
-    headers: {
-      "Content-Type": "text/plain;charset=utf-8"
-    },
-    body: JSON.stringify(payload)
+    body: payload
   }).catch(function (error) {
     console.error("Failed to send product click:", error);
   });
@@ -94,14 +90,10 @@ function sendClickToSpreadsheet(product) {
 
 function trackProductDetailEvent(product) {
   /*
-    Stats4U のページ閲覧カウンターと、商品ごとのイベント計測は
-    別の機能です。
+    Stats4U のページ閲覧カウンターと商品別イベント計測は別機能です。
 
-    この関数では、商品詳細を開いたイベントを HTML の data 属性に
-    設定します。Stats4U がこの属性を自動認識することは未確認です。
-
-    確実に商品別イベントを集計したい場合は、Stats4U の公式仕様に
-    対応したイベント送信方法を確認してから追加してください。
+    このイベントはページ内で発生させていますが、
+    Stats4U 側で自動的に記録されることは保証されません。
   */
 
   document.dispatchEvent(
@@ -274,8 +266,7 @@ function createProductCard(product) {
   detailsButton.className = "btn-primary";
   detailsButton.textContent = "View Details";
 
-  // Stats4U 用のイベント名を属性に設定。
-  // 属性を付けただけで Stats4U が計測するとは限りません。
+  // Stats4U 用の属性。これだけで計測されるとは限りません。
   detailsButton.setAttribute(
     "data-s4u-event",
     "detail-" + String(product.id)
