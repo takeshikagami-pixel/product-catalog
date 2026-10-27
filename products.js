@@ -38,7 +38,7 @@ featured:
   おすすめ商品を先に表示する場合は true
 */
 
-const products = [
+let products = [
   {
     id: "product-001",
     name: "Industrial IoT Edge Gateway X1",
