@@ -313,28 +313,59 @@ function setupModal() {
   });
 }
 
-async function loadProductsFromSpreadsheet() {
-  try {
-    const response = await fetch(PRODUCTS_ENDPOINT_URL, {
-      cache: "no-store"
-    });
 
-    if (!response.ok) throw new Error("HTTP " + response.status);
+function loadProductsFromSpreadsheet() {
+  return new Promise(function (resolve) {
+    const callbackName =
+      "productCatalogCallback_" + Date.now();
 
-    const remoteProducts = await response.json();
+    const script = document.createElement("script");
+    const timeout = setTimeout(function () {
+      cleanup();
+      console.error("Timed out loading products from Google Sheets.");
+      resolve(false);
+    }, 15000);
 
-    if (Array.isArray(remoteProducts) && remoteProducts.length > 0) {
-      products = remoteProducts;
-      console.log("Products loaded from Google Sheets:", products.length);
-    } else {
-      console.warn("Spreadsheet returned no products; using local data.");
+    function cleanup() {
+      clearTimeout(timeout);
+      delete window[callbackName];
+      script.remove();
     }
-  } catch (error) {
-    console.error(
-      "Could not load products from Google Sheets. Using local products.js data.",
-      error
-    );
-  }
+
+    window[callbackName] = function (remoteProducts) {
+      cleanup();
+
+      if (
+        Array.isArray(remoteProducts) &&
+        remoteProducts.length > 0
+      ) {
+        products = remoteProducts;
+        console.log(
+          "Products loaded from Google Sheets:",
+          products.length
+        );
+        resolve(true);
+      } else {
+        console.error("No products returned from Google Sheets.");
+        resolve(false);
+      }
+    };
+
+    script.onerror = function () {
+      cleanup();
+      console.error("Failed to load product data.");
+      resolve(false);
+    };
+
+    script.src =
+      PRODUCTS_ENDPOINT_URL +
+      "?callback=" +
+      encodeURIComponent(callbackName) +
+      "&t=" +
+      Date.now();
+
+    document.head.appendChild(script);
+  });
 }
 
 document.addEventListener("DOMContentLoaded", async function () {
