@@ -4,183 +4,305 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Products recommended by ITO NOBU INDUSTRIAL (INJ) in Japan to ITO NOBU PHILIPPINES (INP).">
+
+  <meta
+    name="description"
+    content="Products recommended by ITO NOBU INDUSTRIAL (INJ) in Japan for ITO NOBU PHILIPPINES (INP)."
+  >
+
   <title>INJ Recommended Products | INJ to INP</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="app.js" defer></script>
+
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+  <!-- Header -->
   <header class="site-header">
     <div class="header-inner">
-      <a class="brand" href="#" aria-label="INJ recommended products home">
-        <span class="brand-mark">P</span>
+
+      <a class="brand" href="#" aria-label="Product Catalog Home">
+        <span class="brand-logo">P</span>
+
         <span class="brand-text">
           <strong>PRODUCT CATALOG</strong>
           <small>INJ RECOMMENDATIONS FOR INP</small>
         </span>
       </a>
-      <span class="internal-label">FOR INP</span>
+
+      <span class="badge-internal">FOR INP</span>
+
     </div>
   </header>
 
   <main>
-    <section class="hero">
+
+    <!-- Hero -->
+    <section class="hero-section">
+
       <div class="hero-content">
         <p class="eyebrow">RECOMMENDED BY INJ · JAPAN</p>
-        <h1>Products recommended<br>by INJ to INP.</h1>
-        <p class="hero-description">
+
+        <h1 class="hero-title">
+          Products recommended<br>
+          by INJ to INP.
+        </h1>
+
+        <p class="hero-desc">
           Discover products selected by ITO NOBU INDUSTRIAL (INJ)
           in Japan for ITO NOBU PHILIPPINES (INP) to consider
           for potential business opportunities.
         </p>
-        <a class="hero-link" href="#catalog">
-          Explore recommended products <span aria-hidden="true">↓</span>
+
+        <a class="btn-primary" href="#catalog">
+          Explore recommended products
+          <span aria-hidden="true">↓</span>
         </a>
       </div>
-      <div class="hero-decoration" aria-hidden="true">
-        <div class="decoration-circle circle-one"></div>
-        <div class="decoration-circle circle-two"></div>
-        <div class="decoration-card">
-          <span class="decoration-label">INJ → INP</span>
-          <span class="decoration-title">Products from Japan.<br>Opportunities in the Philippines.</span>
-          <span class="decoration-line"></span>
+
+      <div class="hero-card" aria-hidden="true">
+        <div class="card-glow"></div>
+
+        <div class="card-content">
+          <span class="tag">INJ → INP</span>
+
+          <span class="card-title">
+            Products from Japan.<br>
+            Opportunities in the Philippines.
+          </span>
         </div>
       </div>
+
     </section>
 
-    <section class="intro-strip">
-      <div class="intro-item">
-        <span class="intro-number">01</span>
+    <!-- How to use -->
+    <section class="features-section">
+
+      <div class="feature-item">
+        <span class="feature-num">01</span>
+
         <div>
           <strong>Discover</strong>
-          <p>Explore products recommended by INJ.</p>
+          <p>Browse products recommended by INJ.</p>
         </div>
       </div>
-      <div class="intro-item">
-        <span class="intro-number">02</span>
+
+      <div class="feature-item">
+        <span class="feature-num">02</span>
+
         <div>
           <strong>Evaluate</strong>
           <p>Review applications and product documents.</p>
         </div>
       </div>
-      <div class="intro-item">
-        <span class="intro-number">03</span>
+
+      <div class="feature-item">
+        <span class="feature-num">03</span>
+
         <div>
           <strong>Consider</strong>
-          <p>Identify potential opportunities for INP.</p>
+          <p>Identify opportunities for INP customers.</p>
         </div>
       </div>
+
     </section>
 
+    <!-- Product Catalog -->
     <section class="catalog-section" id="catalog">
-      <div class="section-heading">
+
+      <div class="catalog-header">
+
         <div>
           <p class="eyebrow">INJ PRODUCT PROPOSALS</p>
+
           <h2>Recommended products for INP</h2>
-          <p class="section-description">
+
+          <p class="sub-text">
             Products selected by INJ in Japan for INP to consider
             introducing to potential customers in the Philippines.
           </p>
         </div>
-        <div class="catalog-count">
-          <strong id="resultCount">0</strong>
+
+        <div class="product-counter">
+          <strong id="product-count-display">0</strong>
           <span>PRODUCTS</span>
         </div>
+
       </div>
 
-      <div class="filter-panel">
+      <!-- Search and Filters -->
+      <div class="filter-bar">
+
         <div class="search-box">
-          <label for="searchInput">Search products</label>
           <input
-            id="searchInput"
             type="search"
-            placeholder="Search name, part number, application..."
+            id="searchInput"
+            placeholder="Search products, keywords..."
+            aria-label="Search products"
           >
         </div>
 
-        <div class="filter-control">
-          <label for="categoryFilter">Category</label>
-          <select id="categoryFilter">
+        <div class="filter-select">
+          <select id="categoryFilter" aria-label="Filter by category">
             <option value="">All categories</option>
           </select>
         </div>
 
-        <div class="filter-control">
-          <label for="manufacturerFilter">Manufacturer</label>
-          <select id="manufacturerFilter">
+        <div class="filter-select">
+          <select id="manufacturerFilter" aria-label="Filter by manufacturer">
             <option value="">All manufacturers</option>
           </select>
         </div>
 
-        <div class="filter-control">
-          <label for="sortSelect">Sort by</label>
-          <select id="sortSelect">
+        <div class="filter-select">
+          <select id="sortBy" aria-label="Sort products">
             <option value="featured">Recommended first</option>
             <option value="name">Product name</option>
             <option value="manufacturer">Manufacturer</option>
           </select>
         </div>
 
-        <button class="reset-button" id="resetFilters" type="button">
+      </div>
+
+      <!-- JavaScript renders product cards here -->
+      <div
+        id="catalog-grid"
+        class="catalog-grid"
+        aria-live="polite"
+      ></div>
+
+      <!-- Empty Search Results -->
+      <div id="emptyState" class="empty-state" hidden>
+
+        <div class="empty-icon" aria-hidden="true">⌕</div>
+
+        <h3>No products found</h3>
+
+        <p>Try a different keyword or change your filters.</p>
+
+        <button
+          type="button"
+          id="resetFilters"
+          class="btn-secondary"
+        >
           Reset filters
         </button>
+
       </div>
 
-      <div id="productGrid" class="product-grid"></div>
-
-      <div id="emptyState" class="empty-state" hidden>
-        <div class="empty-icon" aria-hidden="true">⌕</div>
-        <h3>No products found</h3>
-        <p>Try a different keyword or change your filters.</p>
-        <button class="button button-dark" id="emptyReset" type="button">
-          Clear filters
-        </button>
-      </div>
     </section>
 
-    <section class="sales-note">
-      <div class="sales-note-icon" aria-hidden="true">✳</div>
-      <div>
+    <!-- Business Note -->
+    <section class="cta-section">
+
+      <div class="cta-icon" aria-hidden="true">✳</div>
+
+      <div class="cta-content">
         <h2>A product opportunity for INP?</h2>
+
         <p>
-          These products are recommendations from INJ to INP for
-          consideration. Review the product details and manufacturer
-          documents before making a proposal. Confirm specifications,
-          pricing, availability, and suitability for customer requirements.
-          Product selection does not guarantee availability or an order.
+          These products are recommendations from INJ to INP
+          for business consideration. Before proposing a product
+          to a customer, confirm specifications, pricing, availability,
+          compatibility, and suitability for the customer's requirements.
         </p>
       </div>
+
     </section>
+
   </main>
 
+  <!-- Footer -->
   <footer class="site-footer">
     <div class="footer-inner">
-      <span class="footer-brand">INJ → INP PRODUCT PROPOSALS</span>
-      <span>Recommended by INJ · For INP business consideration</span>
+      <span>INJ → INP PRODUCT PROPOSALS</span>
+
+      <span>
+        Recommended by INJ · For INP business consideration
+      </span>
     </div>
   </footer>
 
+  <!-- Product Detail Modal -->
   <div
     id="productModal"
     class="modal-overlay"
+    hidden
     role="dialog"
     aria-modal="true"
     aria-labelledby="modalTitle"
-    hidden
   >
-    <div class="modal-dialog">
+
+    <div class="modal-window">
+
       <button
-        class="modal-close"
         type="button"
-        data-close-modal
-        aria-label="Close product details"
-      >×</button>
-      <div id="modalContent"></div>
+        class="modal-close"
+        id="modalCloseBtn"
+        aria-label="Close dialog"
+      >
+        &times;
+      </button>
+
+      <div class="modal-body">
+
+        <div class="modal-image-wrapper">
+          <img
+            id="modalImg"
+            src=""
+            alt="Product image"
+          >
+        </div>
+
+        <div class="modal-details-wrapper">
+
+          <span id="modalCategory" class="category-tag"></span>
+
+          <h2 id="modalTitle"></h2>
+
+          <p id="modalManufacturer" class="modal-mfr"></p>
+
+          <div class="modal-desc-box">
+            <h4>Overview & Features</h4>
+            <p id="modalDetails"></p>
+          </div>
+
+          <div class="modal-desc-box recommendation-box">
+            <h4>Why INJ Recommends It</h4>
+            <p id="modalRecommendation"></p>
+          </div>
+
+          <p id="modalViewCount" class="modal-view-count"></p>
+
+          <div class="modal-actions">
+            <a
+              id="modalDocLink"
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn-primary"
+            >
+              View Document / Spec Sheet
+            </a>
+          </div>
+
+        </div>
+
+      </div>
     </div>
   </div>
 
-  <script src="https://www.stats4u.net/s4u.js" data-id="7329541183" data-style="4031" async></script>
-  <!-- Stats4U #7329541183 · Counter settings: https://www.stats4u.net/live/7329541183 -->
+  <!-- Product data -->
+  <script src="products.js"></script>
+
+  <!-- Catalog functionality -->
+  <script src="script.js"></script>
+
+  <!-- Stats4U page-view counter -->
+  <script
+    src="https://www.stats4u.net/s4u.js"
+    data-id="7329541183"
+    async
+  ></script>
+
 </body>
 </html>
