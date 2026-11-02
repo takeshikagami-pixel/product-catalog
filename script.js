@@ -1,7 +1,7 @@
 
 const GAS_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbxxRPOPCQ9nLHz0YhacP4-sBrPL2WengyOONKfYMu9VsV-8Xv5uL_ZlpZIwvMlYlY7AYw/exec";
 
-const PRODUCTS_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbz-ygSRlDjFslLJML4ndFcL9QsAnsgOOPbTZ3IbkFoTfQmQZJrmHChrH1M_M-5oONTPnA/exec";
+const PRODUCTS_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbz-ygSRlDjFslLJML4ndFcL9QsAnsgOOPbTZ3IbkFoTfQmQZjrmHChrH1M_M-5oONTPnA/exec";
 
 const STORAGE_KEY = "catalog_click_counts";
 
