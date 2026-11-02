@@ -313,48 +313,107 @@ function setupModal() {
   });
 }
 
+function showProductLoadStatus(message) {
+  let status = document.getElementById("product-load-status");
+
+  if (!status) {
+    status = document.createElement("div");
+    status.id = "product-load-status";
+    status.style.cssText =
+      "margin:16px auto;padding:12px 16px;max-width:900px;border:1px solid #d97706;border-radius:8px;background:#fffbeb;color:#78350f;font:14px/1.5 sans-serif;";
+
+    const catalog = document.getElementById("catalog");
+    (catalog || document.body).prepend(status);
+  }
+
+  status.textContent = message;
+  status.hidden = !message;
+}
 
 function loadProductsFromSpreadsheet() {
   return new Promise(function (resolve) {
-    const callbackName =
-      "productCatalogCallback_" + Date.now();
-
+    const callbackName = "productCatalogCallback_" + Date.now();
     const script = document.createElement("script");
+    let callbackReceived = false;
+    let finished = false;
+
     const timeout = setTimeout(function () {
+      if (finished) return;
+
+      finished = true;
       cleanup();
-      console.error("Timed out loading products from Google Sheets.");
+
+      console.error("Product data JSONP callback timed out.", script.src);
+
+      showProductLoadStatus(
+        "Could not update the product list from Google Sheets (no data callback received). Showing the local backup list."
+      );
+
       resolve(false);
     }, 15000);
 
     function cleanup() {
       clearTimeout(timeout);
-      delete window[callbackName];
+
+      try {
+        delete window[callbackName];
+      } catch (error) {
+        window[callbackName] = undefined;
+      }
+
       script.remove();
     }
 
     window[callbackName] = function (remoteProducts) {
+      if (finished) return;
+
+      callbackReceived = true;
+      finished = true;
       cleanup();
 
-      if (
-        Array.isArray(remoteProducts) &&
-        remoteProducts.length > 0
-      ) {
+      if (Array.isArray(remoteProducts) && remoteProducts.length > 0) {
         products = remoteProducts;
-        console.log(
-          "Products loaded from Google Sheets:",
-          products.length
-        );
+
+        console.log("Products loaded from Google Sheets:", products.length);
+
+        showProductLoadStatus("");
         resolve(true);
       } else {
-        console.error("No products returned from Google Sheets.");
+        console.error(
+          "Google Sheets returned an empty or invalid product list.",
+          remoteProducts
+        );
+
+        showProductLoadStatus(
+          "Google Sheets responded, but returned no valid products. Showing the local backup list."
+        );
+
         resolve(false);
       }
     };
 
-    script.onerror = function () {
+    script.onerror = function (event) {
+      if (finished) return;
+
+      finished = true;
       cleanup();
-      console.error("Failed to load product data.");
+
+      console.error("Product data script failed to load.", script.src, event);
+
+      showProductLoadStatus(
+        "Could not connect to the Google Sheets product-data endpoint. Showing the local backup list."
+      );
+
       resolve(false);
+    };
+
+    script.onload = function () {
+      if (!callbackReceived && !finished) {
+        console.warn(
+          "Product data script loaded, but the JSONP callback was not called.",
+          script.src
+        );
+      }
     };
 
     script.src =
@@ -364,12 +423,15 @@ function loadProductsFromSpreadsheet() {
       "&t=" +
       Date.now();
 
+    console.log("Requesting product data from:", script.src);
+
     document.head.appendChild(script);
   });
 }
 
 document.addEventListener("DOMContentLoaded", async function () {
   await loadProductsFromSpreadsheet();
+
   populateFilterOptions();
   setupFilters();
   setupModal();
