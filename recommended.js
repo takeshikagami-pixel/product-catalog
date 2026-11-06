@@ -4,8 +4,12 @@
 
   let currentIndex = 0;
   let featuredProducts = [];
+  let autoplayTimer = null;
   let initialized = false;
 
+  const AUTOPLAY_INTERVAL = 5000;
+
+  // Check featured products
   function isFeatured(product) {
     const value = product.featured;
 
@@ -14,23 +18,37 @@
       String(value).trim().toLowerCase() === "true";
   }
 
+  // Create product card
   function createRecommendedCard(product) {
     const card = document.createElement("button");
 
     card.type = "button";
     card.className = "recommended-card";
 
+    card.setAttribute(
+      "aria-label",
+      "View details for " + (product.name || "product")
+    );
+
+    // Product image
     const imageArea = document.createElement("div");
     imageArea.className = "recommended-card-image";
 
     if (product.image) {
       const image = document.createElement("img");
+
       image.src = product.image;
       image.alt = product.name || "Product image";
       image.loading = "lazy";
+
+      image.onerror = function () {
+        this.style.display = "none";
+      };
+
       imageArea.appendChild(image);
     }
 
+    // Product information
     const content = document.createElement("div");
     content.className = "recommended-card-content";
 
@@ -51,60 +69,84 @@
     content.append(tag, name, manufacturer, more);
     card.append(imageArea, content);
 
+    // Existing detail modal and click tracking
     card.addEventListener("click", function () {
       if (typeof window.handleProductClick === "function") {
         window.handleProductClick(product.id);
       } else {
-        console.error("handleProductClick is unavailable.");
+        console.error("Product detail function is unavailable.");
       }
     });
 
     return card;
   }
 
-  function getVisibleCount() {
-    if (window.innerWidth <= 600) return 1;
-    if (window.innerWidth <= 900) return 2;
-    return 3;
+  // Calculate card width
+  function getCardWidth(viewportWidth) {
+    if (window.innerWidth <= 600) {
+      return viewportWidth * 0.84;
+    }
+
+    if (window.innerWidth <= 900) {
+      return viewportWidth * 0.78;
+    }
+
+    return viewportWidth * 0.70;
   }
 
+  // Update carousel position
   function updateCarousel() {
     const track = document.getElementById("recommended-track");
+    const viewport = document.querySelector(
+      ".recommended-viewport"
+    );
+
     const previous = document.getElementById("recommended-prev");
     const next = document.getElementById("recommended-next");
-    const position = document.getElementById("recommended-position");
+    const position = document.getElementById(
+      "recommended-position"
+    );
 
-    if (!track) return;
+    if (!track || !viewport) return;
 
     const cards = track.querySelectorAll(".recommended-card");
 
     if (!cards.length) return;
 
-    const visibleCount = getVisibleCount();
-    const maxIndex = Math.max(
-      0,
-      featuredProducts.length - visibleCount
-    );
+    const viewportWidth = viewport.clientWidth;
+    const cardWidth = getCardWidth(viewportWidth);
+    const gap = parseFloat(getComputedStyle(track).gap) || 0;
+
+    const sideSpace = (viewportWidth - cardWidth) / 2;
+
+    // Apply the same width to every card
+    cards.forEach(function (card) {
+      card.style.flex = "0 0 " + cardWidth + "px";
+    });
+
+    track.style.paddingLeft = sideSpace + "px";
+    track.style.paddingRight = sideSpace + "px";
+
+    const maxIndex = featuredProducts.length - 1;
 
     currentIndex = Math.max(
       0,
       Math.min(currentIndex, maxIndex)
     );
 
-    const gap = parseFloat(getComputedStyle(track).gap) || 0;
-    const cardWidth = cards[0].getBoundingClientRect().width;
+    const moveDistance = cardWidth + gap;
 
     track.style.transform =
       "translate3d(-" +
-      (currentIndex * (cardWidth + gap)) +
+      (currentIndex * moveDistance) +
       "px, 0, 0)";
 
     if (previous) {
-      previous.disabled = currentIndex === 0;
+      previous.disabled = featuredProducts.length <= 1;
     }
 
     if (next) {
-      next.disabled = currentIndex >= maxIndex;
+      next.disabled = featuredProducts.length <= 1;
     }
 
     if (position) {
@@ -113,25 +155,61 @@
     }
   }
 
+  // Move to next product
   function nextProduct() {
-    const maxIndex = Math.max(
-      0,
-      featuredProducts.length - getVisibleCount()
-    );
+    if (featuredProducts.length <= 1) return;
 
-    if (currentIndex < maxIndex) {
-      currentIndex++;
-      updateCarousel();
+    currentIndex++;
+
+    // Return to the first product after the last one
+    if (currentIndex >= featuredProducts.length) {
+      currentIndex = 0;
     }
+
+    updateCarousel();
   }
 
+  // Move to previous product
   function previousProduct() {
-    if (currentIndex > 0) {
-      currentIndex--;
-      updateCarousel();
+    if (featuredProducts.length <= 1) return;
+
+    currentIndex--;
+
+    // Move to the last product before the first one
+    if (currentIndex < 0) {
+      currentIndex = featuredProducts.length - 1;
+    }
+
+    updateCarousel();
+  }
+
+  // Stop automatic movement
+  function stopAutoplay() {
+    if (autoplayTimer) {
+      clearInterval(autoplayTimer);
+      autoplayTimer = null;
     }
   }
 
+  // Start automatic movement every 5 seconds
+  function startAutoplay() {
+    stopAutoplay();
+
+    if (
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+
+    if (featuredProducts.length <= 1) return;
+
+    autoplayTimer = setInterval(function () {
+      nextProduct();
+    }, AUTOPLAY_INTERVAL);
+  }
+
+  // Render recommended products
   function renderRecommendedProducts() {
     const track = document.getElementById("recommended-track");
 
@@ -140,14 +218,21 @@
     }
 
     featuredProducts = products.filter(isFeatured);
+
     track.replaceChildren();
     currentIndex = 0;
 
-    if (!featuredProducts.length) {
+    if (featuredProducts.length === 0) {
       const message = document.createElement("p");
+
       message.className = "recommended-empty";
-      message.textContent = "No recommended products are available.";
+      message.textContent =
+        "No recommended products are available.";
+
       track.appendChild(message);
+
+      stopAutoplay();
+
       return true;
     }
 
@@ -156,30 +241,52 @@
     });
 
     updateCarousel();
+    startAutoplay();
 
     return true;
   }
 
+  // Set up arrows and events
   function setupCarousel() {
     if (initialized) return;
+
     initialized = true;
 
     const previous = document.getElementById("recommended-prev");
     const next = document.getElementById("recommended-next");
 
     if (previous) {
-      previous.addEventListener("click", previousProduct);
+      previous.addEventListener("click", function () {
+        previousProduct();
+        startAutoplay();
+      });
     }
 
     if (next) {
-      next.addEventListener("click", nextProduct);
+      next.addEventListener("click", function () {
+        nextProduct();
+        startAutoplay();
+      });
     }
 
-    window.addEventListener("resize", updateCarousel);
+    window.addEventListener("resize", function () {
+      updateCarousel();
+    });
+
+    // Pause while the browser tab is hidden
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) {
+        stopAutoplay();
+      } else {
+        startAutoplay();
+      }
+    });
   }
 
+  // Wait for the existing product catalog to load
   function waitForProducts() {
     let attempts = 0;
+    const maxAttempts = 150;
 
     const timer = setInterval(function () {
       attempts++;
@@ -192,13 +299,17 @@
         return;
       }
 
-      if (attempts >= 150) {
+      if (attempts >= maxAttempts) {
         clearInterval(timer);
-        console.error("Product loading timed out.");
+
+        console.warn(
+          "Recommended products could not be loaded."
+        );
       }
     }, 200);
   }
 
+  // Initialize
   document.addEventListener("DOMContentLoaded", function () {
     setupCarousel();
     waitForProducts();
