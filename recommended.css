@@ -1,6 +1,6 @@
 
 /* =================================
-   RECOMMENDED PRODUCTS SLIDER
+   RECOMMENDED PRODUCTS CAROUSEL
 ================================= */
 
 .recommended-slider-section {
@@ -43,35 +43,48 @@
   letter-spacing: 1px;
 }
 
-.recommended-slider {
-  max-width: 1200px;
+/* Carousel layout */
+
+.recommended-carousel {
+  max-width: 1280px;
   margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.recommended-viewport {
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
 }
 
 .recommended-track {
   display: flex;
-  width: max-content;
-  gap: 22px;
-  animation: recommended-scroll 35s linear infinite;
+  gap: 20px;
+  transition: transform 0.45s ease;
+  will-change: transform;
 }
 
-.recommended-slider:hover .recommended-track {
-  animation-play-state: paused;
-}
+/* Product card */
 
 .recommended-card {
+  flex: 0 0 calc((100% - 40px) / 3);
+  min-width: 0;
+  min-height: 340px;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  width: 270px;
-  min-height: 330px;
   overflow: hidden;
   border: 1px solid #e5eaf1;
   border-radius: 14px;
-  background: #fff;
+  background: #ffffff;
   box-shadow: 0 5px 18px rgba(20, 40, 70, 0.06);
+  text-align: left;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .recommended-card:hover {
@@ -79,13 +92,18 @@
   box-shadow: 0 12px 28px rgba(20, 40, 70, 0.12);
 }
 
+.recommended-card:focus-visible {
+  outline: 3px solid #6f9b7e;
+  outline-offset: 3px;
+}
+
 .recommended-card-image {
-  height: 175px;
+  height: 190px;
   padding: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
+  background: #ffffff;
 }
 
 .recommended-card-image img {
@@ -130,31 +148,77 @@
   font-weight: 700;
 }
 
-.recommended-empty {
-  max-width: 1200px;
-  margin: 0 auto;
-  color: #64748b;
-  font-size: 14px;
+/* Navigation arrows */
+
+.recommended-arrow {
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #dce4ed;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #2454a6;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-@keyframes recommended-scroll {
-  from {
-    transform: translateX(0);
-  }
+.recommended-arrow:hover {
+  background: #2454a6;
+  color: #ffffff;
+  border-color: #2454a6;
+}
 
-  to {
-    transform: translateX(-50%);
+.recommended-arrow:focus-visible {
+  outline: 3px solid #6f9b7e;
+  outline-offset: 3px;
+}
+
+.recommended-arrow:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* Footer */
+
+.recommended-footer {
+  max-width: 1200px;
+  margin: 18px auto 0;
+  color: #64748b;
+  font-size: 12px;
+  text-align: center;
+}
+
+.recommended-empty {
+  width: 100%;
+  padding: 30px;
+  color: #64748b;
+  text-align: center;
+}
+
+/* Tablet */
+
+@media (max-width: 900px) {
+  .recommended-card {
+    flex-basis: calc((100% - 20px) / 2);
   }
 }
 
 /* Mobile */
+
 @media (max-width: 600px) {
   .recommended-slider-section {
-    padding: 42px 20px;
+    padding: 42px 16px;
   }
 
   .recommended-slider-header {
     align-items: flex-start;
+  }
+
+  .recommended-slider-header h2 {
+    font-size: 23px;
   }
 
   .recommended-label {
@@ -162,24 +226,31 @@
     padding: 7px 10px;
   }
 
+  .recommended-carousel {
+    gap: 8px;
+  }
+
   .recommended-card {
-    width: 235px;
+    flex-basis: 100%;
     min-height: 310px;
   }
 
   .recommended-card-image {
-    height: 155px;
+    height: 175px;
   }
 
-  .recommended-track {
-    gap: 14px;
-    animation-duration: 28s;
+  .recommended-arrow {
+    flex-basis: 32px;
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
   }
 }
 
 /* Accessibility */
+
 @media (prefers-reduced-motion: reduce) {
   .recommended-track {
-    animation: none;
+    transition: none;
   }
 }
