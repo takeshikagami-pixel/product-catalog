@@ -43,7 +43,7 @@
   letter-spacing: 1px;
 }
 
-/* Carousel layout */
+/* Carousel */
 
 .recommended-carousel {
   max-width: 1280px;
@@ -62,14 +62,15 @@
 .recommended-track {
   display: flex;
   gap: 20px;
-  transition: transform 0.45s ease;
+  width: max-content;
+  transition: transform 0.6s ease-in-out;
   will-change: transform;
 }
 
 /* Product card */
 
 .recommended-card {
-  flex: 0 0 calc((100% - 40px) / 3);
+  flex: 0 0 auto;
   min-width: 0;
   min-height: 340px;
   padding: 0;
@@ -83,12 +84,12 @@
   text-align: left;
   cursor: pointer;
   transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .recommended-card:hover {
-  transform: translateY(-5px);
+  border-color: #c5d4e8;
   box-shadow: 0 12px 28px rgba(20, 40, 70, 0.12);
 }
 
@@ -98,8 +99,8 @@
 }
 
 .recommended-card-image {
-  height: 190px;
-  padding: 14px;
+  height: 210px;
+  padding: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -113,7 +114,7 @@
 }
 
 .recommended-card-content {
-  padding: 16px 18px 20px;
+  padding: 16px 20px 20px;
 }
 
 .recommended-card-tag {
@@ -123,13 +124,12 @@
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.8px;
-  text-transform: uppercase;
 }
 
 .recommended-card h3 {
   margin: 0 0 8px;
   color: #172b4d;
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.45;
 }
 
@@ -165,7 +165,7 @@
   transition: all 0.2s ease;
 }
 
-.recommended-arrow:hover {
+.recommended-arrow:hover:not(:disabled) {
   background: #2454a6;
   color: #ffffff;
   border-color: #2454a6;
@@ -201,8 +201,16 @@
 /* Tablet */
 
 @media (max-width: 900px) {
+  .recommended-slider-section {
+    padding: 50px 4%;
+  }
+
   .recommended-card {
-    flex-basis: calc((100% - 20px) / 2);
+    min-height: 320px;
+  }
+
+  .recommended-card-image {
+    height: 190px;
   }
 }
 
@@ -210,7 +218,7 @@
 
 @media (max-width: 600px) {
   .recommended-slider-section {
-    padding: 42px 16px;
+    padding: 42px 12px;
   }
 
   .recommended-slider-header {
@@ -227,23 +235,30 @@
   }
 
   .recommended-carousel {
-    gap: 8px;
+    gap: 6px;
+  }
+
+  .recommended-arrow {
+    flex-basis: 30px;
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
   }
 
   .recommended-card {
-    flex-basis: 100%;
-    min-height: 310px;
+    min-height: 300px;
   }
 
   .recommended-card-image {
     height: 175px;
   }
 
-  .recommended-arrow {
-    flex-basis: 32px;
-    width: 32px;
-    height: 32px;
-    font-size: 13px;
+  .recommended-card-content {
+    padding: 14px;
+  }
+
+  .recommended-card h3 {
+    font-size: 15px;
   }
 }
 
