@@ -43,7 +43,7 @@
   letter-spacing: 1px;
 }
 
-/* Carousel */
+/* Carousel layout */
 
 .recommended-carousel {
   max-width: 1280px;
@@ -54,24 +54,36 @@
 }
 
 .recommended-viewport {
-  flex: 1;
+  flex: 1 1 0;
   min-width: 0;
   overflow: hidden;
+  position: relative;
 }
 
 .recommended-track {
   display: flex;
+  flex-wrap: nowrap;
   gap: 20px;
   width: max-content;
+  max-width: none;
+  box-sizing: border-box;
   transition: transform 0.6s ease-in-out;
   will-change: transform;
+}
+
+/* Force one main card with partial cards on both sides */
+
+.recommended-slider-section .recommended-track > .recommended-card {
+  flex: 0 0 var(--recommended-card-width, 78%) !important;
+  width: var(--recommended-card-width, 78%) !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  box-sizing: border-box !important;
 }
 
 /* Product card */
 
 .recommended-card {
-  flex: 0 0 auto;
-  min-width: 0;
   min-height: 340px;
   padding: 0;
   display: flex;
@@ -83,13 +95,9 @@
   box-shadow: 0 5px 18px rgba(20, 40, 70, 0.06);
   text-align: left;
   cursor: pointer;
-  transition:
-    box-shadow 0.2s ease,
-    border-color 0.2s ease;
 }
 
 .recommended-card:hover {
-  border-color: #c5d4e8;
   box-shadow: 0 12px 28px rgba(20, 40, 70, 0.12);
 }
 
@@ -205,6 +213,11 @@
     padding: 50px 4%;
   }
 
+  .recommended-slider-section .recommended-track > .recommended-card {
+    flex-basis: var(--recommended-card-width, 82%) !important;
+    width: var(--recommended-card-width, 82%) !important;
+  }
+
   .recommended-card {
     min-height: 320px;
   }
@@ -243,6 +256,11 @@
     width: 30px;
     height: 30px;
     font-size: 12px;
+  }
+
+  .recommended-slider-section .recommended-track > .recommended-card {
+    flex-basis: var(--recommended-card-width, 84%) !important;
+    width: var(--recommended-card-width, 84%) !important;
   }
 
   .recommended-card {
