@@ -1,9 +1,12 @@
 
 const GAS_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbxxRPOPCQ9nLHz0YhacP4-sBrPL2WengyOONKfYMu9VsV-8Xv5uL_ZlpZIwvMlYlY7AYw/exec";
 
-const PRODUCTS_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbz-ygSRlDjFslLJML4ndFcL9QsAnsgOOPbTZ3IbkFoTfQmQZjrmHChrH1M_M-5oONTPnA/exec";
+const PRODUCTS_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbz-ygSRlDjFslLJML4ndFcL9QsAnsgOOPbTZ3IbkFoTfQmQZrmHChrH1M_M-5oONTPnA/exec";
 
 const STORAGE_KEY = "catalog_click_counts";
+
+let currentModalImages = [];
+let currentModalImageIndex = 0;
 
 function getElement(id) {
   return document.getElementById(id);
@@ -69,11 +72,196 @@ function handleProductClick(productId) {
   openModal(product);
 }
 
+/* =================================
+   PRODUCT IMAGE GALLERY
+================================= */
+
+// Get all product images
+function getProductImages(product) {
+  let imageList = [];
+
+  // Support an images array or string if provided
+  if (Array.isArray(product.images)) {
+    imageList = product.images;
+  } else if (typeof product.images === "string" && product.images.trim()) {
+    try {
+      const parsed = JSON.parse(product.images);
+      imageList = Array.isArray(parsed)
+        ? parsed
+        : product.images.split(",");
+    } catch (error) {
+      imageList = product.images.split(",");
+    }
+  }
+
+  // Also support image, image2, image3, image4, image5 columns
+  const columnImages = [
+    product.image,
+    product.image2,
+    product.image3,
+    product.image4,
+    product.image5
+  ];
+
+  imageList = imageList.concat(columnImages);
+
+  // Remove blanks and duplicate paths
+  return [...new Set(
+    imageList
+      .filter(Boolean)
+      .map(image => String(image).trim())
+      .filter(Boolean)
+  )];
+}
+
+// Display the selected main image
+function showModalImage(index) {
+  const modalImg = getElement("modalImg");
+  const thumbnails = getElement("modalImageThumbnails");
+  const position = getElement("modalImagePosition");
+  const previous = getElement("modalImagePrev");
+  const next = getElement("modalImageNext");
+
+  if (!modalImg || currentModalImages.length === 0) return;
+
+  currentModalImageIndex =
+    (index + currentModalImages.length) % currentModalImages.length;
+
+  modalImg.src = currentModalImages[currentModalImageIndex];
+  modalImg.style.display = "";
+  modalImg.alt =
+    "Product image " +
+    (currentModalImageIndex + 1);
+
+  if (position) {
+    position.textContent =
+      (currentModalImageIndex + 1) +
+      " / " +
+      currentModalImages.length;
+  }
+
+  if (thumbnails) {
+    const buttons = thumbnails.querySelectorAll(".modal-gallery-thumb");
+
+    buttons.forEach((button, buttonIndex) => {
+      button.classList.toggle(
+        "active",
+        buttonIndex === currentModalImageIndex
+      );
+    });
+  }
+
+  const multipleImages = currentModalImages.length > 1;
+
+  if (previous) previous.hidden = !multipleImages;
+  if (next) next.hidden = !multipleImages;
+
+  if (position) position.hidden = !multipleImages;
+}
+
+// Build thumbnail buttons
+function renderModalThumbnails() {
+  const thumbnails = getElement("modalImageThumbnails");
+
+  if (!thumbnails) return;
+
+  thumbnails.replaceChildren();
+
+  currentModalImages.forEach((imageUrl, index) => {
+    const button = document.createElement("button");
+
+    button.type = "button";
+    button.className = "modal-gallery-thumb";
+    button.setAttribute(
+      "aria-label",
+      "Show product image " + (index + 1)
+    );
+
+    const image = document.createElement("img");
+    image.src = imageUrl;
+    image.alt = "Product thumbnail " + (index + 1);
+    image.loading = "lazy";
+
+    image.onerror = function () {
+      button.style.display = "none";
+    };
+
+    button.appendChild(image);
+
+    button.addEventListener("click", function () {
+      showModalImage(index);
+    });
+
+    thumbnails.appendChild(button);
+  });
+
+  thumbnails.hidden = currentModalImages.length <= 1;
+}
+
+// Initialize product gallery
+function setupProductGallery(product) {
+  currentModalImages = getProductImages(product);
+  currentModalImageIndex = 0;
+
+  const modalImg = getElement("modalImg");
+
+  if (currentModalImages.length === 0) {
+    if (modalImg) {
+      modalImg.removeAttribute("src");
+      modalImg.style.display = "none";
+    }
+
+    const thumbnails = getElement("modalImageThumbnails");
+    const position = getElement("modalImagePosition");
+    const previous = getElement("modalImagePrev");
+    const next = getElement("modalImageNext");
+
+    if (thumbnails) {
+      thumbnails.replaceChildren();
+      thumbnails.hidden = true;
+    }
+
+    if (position) position.hidden = true;
+    if (previous) previous.hidden = true;
+    if (next) next.hidden = true;
+
+    return;
+  }
+
+  renderModalThumbnails();
+  showModalImage(0);
+}
+
+// Set up gallery arrow buttons
+function setupGalleryControls() {
+  const previous = getElement("modalImagePrev");
+  const next = getElement("modalImageNext");
+
+  if (previous && !previous.dataset.initialized) {
+    previous.dataset.initialized = "true";
+
+    previous.addEventListener("click", function () {
+      showModalImage(currentModalImageIndex - 1);
+    });
+  }
+
+  if (next && !next.dataset.initialized) {
+    next.dataset.initialized = "true";
+
+    next.addEventListener("click", function () {
+      showModalImage(currentModalImageIndex + 1);
+    });
+  }
+}
+
+/* =================================
+   PRODUCT DETAIL MODAL
+================================= */
+
 function openModal(product) {
   const modal = getElement("productModal");
   if (!modal) return;
 
-  const modalImg = getElement("modalImg");
   const modalCategory = getElement("modalCategory");
   const modalTitle = getElement("modalTitle");
   const modalManufacturer = getElement("modalManufacturer");
@@ -82,14 +270,8 @@ function openModal(product) {
   const modalDocLink = getElement("modalDocLink");
   const modalViewCount = getElement("modalViewCount");
 
-  if (modalImg) {
-    modalImg.style.display = product.image ? "" : "none";
-    modalImg.src = product.image || "";
-    modalImg.alt = product.name || "Product image";
-    modalImg.onerror = function () {
-      this.style.display = "none";
-    };
-  }
+  setupProductGallery(product);
+  setupGalleryControls();
 
   if (modalCategory) {
     modalCategory.textContent = product.category || "Uncategorized";
@@ -140,9 +322,15 @@ function openModal(product) {
 
 function closeModal() {
   const modal = getElement("productModal");
+
   if (modal) modal.hidden = true;
+
   document.body.classList.remove("modal-open");
 }
+
+/* =================================
+   PRODUCT CATALOG
+================================= */
 
 function createProductCard(product) {
   const card = document.createElement("article");
@@ -156,9 +344,11 @@ function createProductCard(product) {
     image.src = product.image;
     image.alt = product.name || "Product image";
     image.loading = "lazy";
+
     image.onerror = function () {
       this.style.display = "none";
     };
+
     imageArea.appendChild(image);
   }
 
@@ -195,12 +385,14 @@ function createProductCard(product) {
   detailsButton.textContent = "View Details";
   detailsButton.setAttribute("data-s4u-event", "detail-" + String(product.id));
   detailsButton.setAttribute("data-s4u-id", "7329541183");
+
   detailsButton.addEventListener("click", function () {
     handleProductClick(product.id);
   });
 
   info.append(category, name, manufacturer, description, detailsButton);
   card.append(imageArea, info);
+
   return card;
 }
 
@@ -208,6 +400,7 @@ function renderCatalog() {
   const grid = getElement("catalog-grid");
   const countDisplay = getElement("product-count-display");
   const emptyState = getElement("emptyState");
+
   if (!grid) return;
 
   const keyword = (getElement("searchInput")?.value || "").trim().toLowerCase();
@@ -244,6 +437,7 @@ function renderCatalog() {
   }
 
   grid.replaceChildren();
+
   filteredProducts.forEach(product => {
     grid.appendChild(createProductCard(product));
   });
@@ -258,18 +452,35 @@ function populateFilterOptions() {
 
   if (categoryFilter) {
     const current = categoryFilter.value;
-    const categories = [...new Set(products.map(p => p.category).filter(Boolean))].sort();
+
+    const categories = [
+      ...new Set(products.map(p => p.category).filter(Boolean))
+    ].sort();
+
     categoryFilter.replaceChildren(new Option("All categories", ""));
-    categories.forEach(value => categoryFilter.add(new Option(value, value)));
+
+    categories.forEach(value => {
+      categoryFilter.add(new Option(value, value));
+    });
+
     categoryFilter.value = categories.includes(current) ? current : "";
   }
 
   if (manufacturerFilter) {
     const current = manufacturerFilter.value;
-    const manufacturers = [...new Set(products.map(p => p.manufacturer).filter(Boolean))].sort();
+
+    const manufacturers = [
+      ...new Set(products.map(p => p.manufacturer).filter(Boolean))
+    ].sort();
+
     manufacturerFilter.replaceChildren(new Option("All manufacturers", ""));
-    manufacturers.forEach(value => manufacturerFilter.add(new Option(value, value)));
-    manufacturerFilter.value = manufacturers.includes(current) ? current : "";
+
+    manufacturers.forEach(value => {
+      manufacturerFilter.add(new Option(value, value));
+    });
+
+    manufacturerFilter.value =
+      manufacturers.includes(current) ? current : "";
   }
 }
 
@@ -280,10 +491,21 @@ function setupFilters() {
   const sortBy = getElement("sortBy");
   const resetButton = getElement("resetFilters");
 
-  if (searchInput) searchInput.addEventListener("input", renderCatalog);
-  if (categoryFilter) categoryFilter.addEventListener("change", renderCatalog);
-  if (manufacturerFilter) manufacturerFilter.addEventListener("change", renderCatalog);
-  if (sortBy) sortBy.addEventListener("change", renderCatalog);
+  if (searchInput) {
+    searchInput.addEventListener("input", renderCatalog);
+  }
+
+  if (categoryFilter) {
+    categoryFilter.addEventListener("change", renderCatalog);
+  }
+
+  if (manufacturerFilter) {
+    manufacturerFilter.addEventListener("change", renderCatalog);
+  }
+
+  if (sortBy) {
+    sortBy.addEventListener("change", renderCatalog);
+  }
 
   if (resetButton) {
     resetButton.addEventListener("click", function () {
@@ -291,16 +513,23 @@ function setupFilters() {
       if (categoryFilter) categoryFilter.value = "";
       if (manufacturerFilter) manufacturerFilter.value = "";
       if (sortBy) sortBy.value = "featured";
+
       renderCatalog();
     });
   }
 }
 
+/* =================================
+   MODAL CONTROLS
+================================= */
+
 function setupModal() {
   const modal = getElement("productModal");
   const closeButton = getElement("modalCloseBtn");
 
-  if (closeButton) closeButton.addEventListener("click", closeModal);
+  if (closeButton) {
+    closeButton.addEventListener("click", closeModal);
+  }
 
   if (modal) {
     modal.addEventListener("click", function (event) {
@@ -309,9 +538,26 @@ function setupModal() {
   }
 
   document.addEventListener("keydown", function (event) {
-    if (event.key === "Escape" && modal && !modal.hidden) closeModal();
+    if (event.key === "Escape" && modal && !modal.hidden) {
+      closeModal();
+      return;
+    }
+
+    if (!modal || modal.hidden) return;
+
+    if (event.key === "ArrowLeft") {
+      showModalImage(currentModalImageIndex - 1);
+    }
+
+    if (event.key === "ArrowRight") {
+      showModalImage(currentModalImageIndex + 1);
+    }
   });
 }
+
+/* =================================
+   PRODUCT DATA LOADING
+================================= */
 
 function showProductLoadStatus(message) {
   let status = document.getElementById("product-load-status");
@@ -319,6 +565,7 @@ function showProductLoadStatus(message) {
   if (!status) {
     status = document.createElement("div");
     status.id = "product-load-status";
+
     status.style.cssText =
       "margin:16px auto;padding:12px 16px;max-width:900px;border:1px solid #d97706;border-radius:8px;background:#fffbeb;color:#78350f;font:14px/1.5 sans-serif;";
 
@@ -334,6 +581,7 @@ function loadProductsFromSpreadsheet() {
   return new Promise(function (resolve) {
     const callbackName = "productCatalogCallback_" + Date.now();
     const script = document.createElement("script");
+
     let callbackReceived = false;
     let finished = false;
 
@@ -343,7 +591,10 @@ function loadProductsFromSpreadsheet() {
       finished = true;
       cleanup();
 
-      console.error("Product data JSONP callback timed out.", script.src);
+      console.error(
+        "Product data JSONP callback timed out.",
+        script.src
+      );
 
       showProductLoadStatus(
         "Could not update the product list from Google Sheets (no data callback received). Showing the local backup list."
@@ -374,7 +625,10 @@ function loadProductsFromSpreadsheet() {
       if (Array.isArray(remoteProducts) && remoteProducts.length > 0) {
         products = remoteProducts;
 
-        console.log("Products loaded from Google Sheets:", products.length);
+        console.log(
+          "Products loaded from Google Sheets:",
+          products.length
+        );
 
         showProductLoadStatus("");
         resolve(true);
@@ -398,7 +652,11 @@ function loadProductsFromSpreadsheet() {
       finished = true;
       cleanup();
 
-      console.error("Product data script failed to load.", script.src, event);
+      console.error(
+        "Product data script failed to load.",
+        script.src,
+        event
+      );
 
       showProductLoadStatus(
         "Could not connect to the Google Sheets product-data endpoint. Showing the local backup list."
@@ -423,11 +681,18 @@ function loadProductsFromSpreadsheet() {
       "&t=" +
       Date.now();
 
-    console.log("Requesting product data from:", script.src);
+    console.log(
+      "Requesting product data from:",
+      script.src
+    );
 
     document.head.appendChild(script);
   });
 }
+
+/* =================================
+   INITIALIZE
+================================= */
 
 document.addEventListener("DOMContentLoaded", async function () {
   await loadProductsFromSpreadsheet();
