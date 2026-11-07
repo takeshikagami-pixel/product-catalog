@@ -348,10 +348,21 @@ function createProductCard(product) {
     ? "Manufacturer: " + product.manufacturer
     : "Manufacturer not specified";
 
+  // 一覧画面では商品説明を1文・最大110文字程度に短縮
   const description = document.createElement("p");
   description.className = "product-description";
-  description.textContent =
+
+  const fullDescription =
     product.description || "Product details are not available yet.";
+
+  const firstSentence =
+    fullDescription.match(/^[\s\S]*?[.!?](?=\s|$)/)?.[0] ||
+    fullDescription;
+
+  description.textContent =
+    firstSentence.length > 110
+      ? firstSentence.substring(0, 107).trim() + "..."
+      : firstSentence;
 
   const detailsButton = document.createElement("button");
   detailsButton.type = "button";
