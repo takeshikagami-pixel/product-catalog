@@ -72,191 +72,162 @@ function handleProductClick(productId) {
   openModal(product);
 }
 
-/* =================================
-   PRODUCT IMAGE GALLERY
-================================= */
+window.handleProductClick = handleProductClick;
 
-// Get all product images
+
+// ------------------------------
+// Product image gallery
+// ------------------------------
+
 function getProductImages(product) {
-  let imageList = [];
-
-  // Support an images array or string if provided
-  if (Array.isArray(product.images)) {
-    imageList = product.images;
-  } else if (typeof product.images === "string" && product.images.trim()) {
-    try {
-      const parsed = JSON.parse(product.images);
-      imageList = Array.isArray(parsed)
-        ? parsed
-        : product.images.split(",");
-    } catch (error) {
-      imageList = product.images.split(",");
-    }
-  }
-
-  // Also support image, image2, image3, image4, image5 columns
-  const columnImages = [
+  return [
     product.image,
     product.image2,
     product.image3,
     product.image4,
     product.image5
-  ];
-
-  imageList = imageList.concat(columnImages);
-
-  // Remove blanks and duplicate paths
-  return [...new Set(
-    imageList
-      .filter(Boolean)
-      .map(image => String(image).trim())
-      .filter(Boolean)
-  )];
+  ]
+    .map(image => String(image || "").trim())
+    .filter(Boolean)
+    .filter((image, index, array) => array.indexOf(image) === index);
 }
 
-// Display the selected main image
-function showModalImage(index) {
+function updateModalGallery() {
   const modalImg = getElement("modalImg");
   const thumbnails = getElement("modalImageThumbnails");
+  const previousButton = getElement("modalImagePrev");
+  const nextButton = getElement("modalImageNext");
   const position = getElement("modalImagePosition");
-  const previous = getElement("modalImagePrev");
-  const next = getElement("modalImageNext");
 
-  if (!modalImg || currentModalImages.length === 0) return;
+  if (!modalImg) return;
 
-  currentModalImageIndex =
-    (index + currentModalImages.length) % currentModalImages.length;
+  const total = currentModalImages.length;
 
-  modalImg.src = currentModalImages[currentModalImageIndex];
-  modalImg.style.display = "";
-  modalImg.alt =
-    "Product image " +
-    (currentModalImageIndex + 1);
-
-  if (position) {
-    position.textContent =
-      (currentModalImageIndex + 1) +
-      " / " +
-      currentModalImages.length;
-  }
-
-  if (thumbnails) {
-    const buttons = thumbnails.querySelectorAll(".modal-gallery-thumb");
-
-    buttons.forEach((button, buttonIndex) => {
-      button.classList.toggle(
-        "active",
-        buttonIndex === currentModalImageIndex
-      );
-    });
-  }
-
-  const multipleImages = currentModalImages.length > 1;
-
-  if (previous) previous.hidden = !multipleImages;
-  if (next) next.hidden = !multipleImages;
-
-  if (position) position.hidden = !multipleImages;
-}
-
-// Build thumbnail buttons
-function renderModalThumbnails() {
-  const thumbnails = getElement("modalImageThumbnails");
-
-  if (!thumbnails) return;
-
-  thumbnails.replaceChildren();
-
-  currentModalImages.forEach((imageUrl, index) => {
-    const button = document.createElement("button");
-
-    button.type = "button";
-    button.className = "modal-gallery-thumb";
-    button.setAttribute(
-      "aria-label",
-      "Show product image " + (index + 1)
-    );
-
-    const image = document.createElement("img");
-    image.src = imageUrl;
-    image.alt = "Product thumbnail " + (index + 1);
-    image.loading = "lazy";
-
-    image.onerror = function () {
-      button.style.display = "none";
-    };
-
-    button.appendChild(image);
-
-    button.addEventListener("click", function () {
-      showModalImage(index);
-    });
-
-    thumbnails.appendChild(button);
-  });
-
-  thumbnails.hidden = currentModalImages.length <= 1;
-}
-
-// Initialize product gallery
-function setupProductGallery(product) {
-  currentModalImages = getProductImages(product);
-  currentModalImageIndex = 0;
-
-  const modalImg = getElement("modalImg");
-
-  if (currentModalImages.length === 0) {
-    if (modalImg) {
-      modalImg.removeAttribute("src");
-      modalImg.style.display = "none";
-    }
-
-    const thumbnails = getElement("modalImageThumbnails");
-    const position = getElement("modalImagePosition");
-    const previous = getElement("modalImagePrev");
-    const next = getElement("modalImageNext");
+  if (total === 0) {
+    modalImg.style.display = "none";
 
     if (thumbnails) {
       thumbnails.replaceChildren();
-      thumbnails.hidden = true;
+      thumbnails.style.display = "none";
     }
 
-    if (position) position.hidden = true;
-    if (previous) previous.hidden = true;
-    if (next) next.hidden = true;
+    if (previousButton) previousButton.style.display = "none";
+    if (nextButton) nextButton.style.display = "none";
+    if (position) position.textContent = "";
 
     return;
   }
 
-  renderModalThumbnails();
-  showModalImage(0);
-}
+  currentModalImageIndex = Math.max(
+    0,
+    Math.min(currentModalImageIndex, total - 1)
+  );
 
-// Set up gallery arrow buttons
-function setupGalleryControls() {
-  const previous = getElement("modalImagePrev");
-  const next = getElement("modalImageNext");
+  modalImg.style.display = "";
+  modalImg.src = currentModalImages[currentModalImageIndex];
+  modalImg.alt = "Product image " +
+    (currentModalImageIndex + 1);
 
-  if (previous && !previous.dataset.initialized) {
-    previous.dataset.initialized = "true";
+  modalImg.onerror = function () {
+    this.style.display = "none";
+    console.error("Product image could not be loaded:", this.src);
+  };
 
-    previous.addEventListener("click", function () {
-      showModalImage(currentModalImageIndex - 1);
-    });
+  const hasMultipleImages = total > 1;
+
+  if (previousButton) {
+    previousButton.style.display = hasMultipleImages ? "" : "none";
+    previousButton.disabled = !hasMultipleImages;
   }
 
-  if (next && !next.dataset.initialized) {
-    next.dataset.initialized = "true";
+  if (nextButton) {
+    nextButton.style.display = hasMultipleImages ? "" : "none";
+    nextButton.disabled = !hasMultipleImages;
+  }
 
-    next.addEventListener("click", function () {
-      showModalImage(currentModalImageIndex + 1);
-    });
+  if (position) {
+    position.textContent = (currentModalImageIndex + 1) + " / " + total;
+    position.style.display = hasMultipleImages ? "" : "none";
+  }
+
+  if (thumbnails) {
+    thumbnails.replaceChildren();
+    thumbnails.style.display = hasMultipleImages ? "" : "none";
+
+    if (hasMultipleImages) {
+      currentModalImages.forEach((imageUrl, index) => {
+        const thumbnail = document.createElement("button");
+
+        thumbnail.type = "button";
+        thumbnail.className = "modal-image-thumbnail";
+        thumbnail.setAttribute(
+          "aria-label",
+          "Show product image " + (index + 1)
+        );
+
+        if (index === currentModalImageIndex) {
+          thumbnail.classList.add("active");
+          thumbnail.setAttribute("aria-current", "true");
+        }
+
+        const thumbnailImage = document.createElement("img");
+        thumbnailImage.src = imageUrl;
+        thumbnailImage.alt = "Thumbnail " + (index + 1);
+        thumbnailImage.loading = "lazy";
+
+        thumbnailImage.onerror = function () {
+          thumbnail.style.display = "none";
+        };
+
+        thumbnail.appendChild(thumbnailImage);
+
+        thumbnail.addEventListener("click", function () {
+          currentModalImageIndex = index;
+          updateModalGallery();
+        });
+
+        thumbnails.appendChild(thumbnail);
+      });
+    }
   }
 }
 
-/* =================================
-   PRODUCT DETAIL MODAL
-================================= */
+function showPreviousModalImage() {
+  if (currentModalImages.length <= 1) return;
+
+  currentModalImageIndex =
+    (currentModalImageIndex - 1 + currentModalImages.length) %
+    currentModalImages.length;
+
+  updateModalGallery();
+}
+
+function showNextModalImage() {
+  if (currentModalImages.length <= 1) return;
+
+  currentModalImageIndex =
+    (currentModalImageIndex + 1) % currentModalImages.length;
+
+  updateModalGallery();
+}
+
+function setupImageGallery() {
+  const previousButton = getElement("modalImagePrev");
+  const nextButton = getElement("modalImageNext");
+
+  if (previousButton) {
+    previousButton.addEventListener("click", showPreviousModalImage);
+  }
+
+  if (nextButton) {
+    nextButton.addEventListener("click", showNextModalImage);
+  }
+}
+
+
+// ------------------------------
+// Product detail modal
+// ------------------------------
 
 function openModal(product) {
   const modal = getElement("productModal");
@@ -270,8 +241,10 @@ function openModal(product) {
   const modalDocLink = getElement("modalDocLink");
   const modalViewCount = getElement("modalViewCount");
 
-  setupProductGallery(product);
-  setupGalleryControls();
+  currentModalImages = getProductImages(product);
+  currentModalImageIndex = 0;
+
+  updateModalGallery();
 
   if (modalCategory) {
     modalCategory.textContent = product.category || "Uncategorized";
@@ -328,9 +301,10 @@ function closeModal() {
   document.body.classList.remove("modal-open");
 }
 
-/* =================================
-   PRODUCT CATALOG
-================================= */
+
+// ------------------------------
+// Product cards
+// ------------------------------
 
 function createProductCard(product) {
   const card = document.createElement("article");
@@ -383,7 +357,10 @@ function createProductCard(product) {
   detailsButton.type = "button";
   detailsButton.className = "btn-primary";
   detailsButton.textContent = "View Details";
-  detailsButton.setAttribute("data-s4u-event", "detail-" + String(product.id));
+  detailsButton.setAttribute(
+    "data-s4u-event",
+    "detail-" + String(product.id)
+  );
   detailsButton.setAttribute("data-s4u-id", "7329541183");
 
   detailsButton.addEventListener("click", function () {
@@ -396,6 +373,11 @@ function createProductCard(product) {
   return card;
 }
 
+
+// ------------------------------
+// Catalog rendering and filters
+// ------------------------------
+
 function renderCatalog() {
   const grid = getElement("catalog-grid");
   const countDisplay = getElement("product-count-display");
@@ -403,10 +385,18 @@ function renderCatalog() {
 
   if (!grid) return;
 
-  const keyword = (getElement("searchInput")?.value || "").trim().toLowerCase();
-  const selectedCategory = getElement("categoryFilter")?.value || "";
-  const selectedManufacturer = getElement("manufacturerFilter")?.value || "";
-  const sortValue = getElement("sortBy")?.value || "featured";
+  const keyword = (
+    getElement("searchInput")?.value || ""
+  ).trim().toLowerCase();
+
+  const selectedCategory =
+    getElement("categoryFilter")?.value || "";
+
+  const selectedManufacturer =
+    getElement("manufacturerFilter")?.value || "";
+
+  const sortValue =
+    getElement("sortBy")?.value || "featured";
 
   let filteredProducts = products.filter(product => {
     const searchableText = [
@@ -419,7 +409,8 @@ function renderCatalog() {
 
     return searchableText.includes(keyword) &&
       (!selectedCategory || product.category === selectedCategory) &&
-      (!selectedManufacturer || product.manufacturer === selectedManufacturer);
+      (!selectedManufacturer ||
+        product.manufacturer === selectedManufacturer);
   });
 
   if (sortValue === "name") {
@@ -442,8 +433,13 @@ function renderCatalog() {
     grid.appendChild(createProductCard(product));
   });
 
-  if (countDisplay) countDisplay.textContent = filteredProducts.length;
-  if (emptyState) emptyState.hidden = filteredProducts.length !== 0;
+  if (countDisplay) {
+    countDisplay.textContent = filteredProducts.length;
+  }
+
+  if (emptyState) {
+    emptyState.hidden = filteredProducts.length !== 0;
+  }
 }
 
 function populateFilterOptions() {
@@ -457,7 +453,9 @@ function populateFilterOptions() {
       ...new Set(products.map(p => p.category).filter(Boolean))
     ].sort();
 
-    categoryFilter.replaceChildren(new Option("All categories", ""));
+    categoryFilter.replaceChildren(
+      new Option("All categories", "")
+    );
 
     categories.forEach(value => {
       categoryFilter.add(new Option(value, value));
@@ -473,7 +471,9 @@ function populateFilterOptions() {
       ...new Set(products.map(p => p.manufacturer).filter(Boolean))
     ].sort();
 
-    manufacturerFilter.replaceChildren(new Option("All manufacturers", ""));
+    manufacturerFilter.replaceChildren(
+      new Option("All manufacturers", "")
+    );
 
     manufacturers.forEach(value => {
       manufacturerFilter.add(new Option(value, value));
@@ -519,9 +519,10 @@ function setupFilters() {
   }
 }
 
-/* =================================
-   MODAL CONTROLS
-================================= */
+
+// ------------------------------
+// Modal controls
+// ------------------------------
 
 function setupModal() {
   const modal = getElement("productModal");
@@ -538,29 +539,25 @@ function setupModal() {
   }
 
   document.addEventListener("keydown", function (event) {
-    if (event.key === "Escape" && modal && !modal.hidden) {
-      closeModal();
-      return;
-    }
-
     if (!modal || modal.hidden) return;
 
-    if (event.key === "ArrowLeft") {
-      showModalImage(currentModalImageIndex - 1);
-    }
-
-    if (event.key === "ArrowRight") {
-      showModalImage(currentModalImageIndex + 1);
+    if (event.key === "Escape") {
+      closeModal();
+    } else if (event.key === "ArrowLeft") {
+      showPreviousModalImage();
+    } else if (event.key === "ArrowRight") {
+      showNextModalImage();
     }
   });
 }
 
-/* =================================
-   PRODUCT DATA LOADING
-================================= */
+
+// ------------------------------
+// Product data loading
+// ------------------------------
 
 function showProductLoadStatus(message) {
-  let status = document.getElementById("product-load-status");
+  let status = getElement("product-load-status");
 
   if (!status) {
     status = document.createElement("div");
@@ -569,7 +566,7 @@ function showProductLoadStatus(message) {
     status.style.cssText =
       "margin:16px auto;padding:12px 16px;max-width:900px;border:1px solid #d97706;border-radius:8px;background:#fffbeb;color:#78350f;font:14px/1.5 sans-serif;";
 
-    const catalog = document.getElementById("catalog");
+    const catalog = getElement("catalog");
     (catalog || document.body).prepend(status);
   }
 
@@ -579,7 +576,9 @@ function showProductLoadStatus(message) {
 
 function loadProductsFromSpreadsheet() {
   return new Promise(function (resolve) {
-    const callbackName = "productCatalogCallback_" + Date.now();
+    const callbackName =
+      "productCatalogCallback_" + Date.now();
+
     const script = document.createElement("script");
 
     let callbackReceived = false;
@@ -622,7 +621,10 @@ function loadProductsFromSpreadsheet() {
       finished = true;
       cleanup();
 
-      if (Array.isArray(remoteProducts) && remoteProducts.length > 0) {
+      if (
+        Array.isArray(remoteProducts) &&
+        remoteProducts.length > 0
+      ) {
         products = remoteProducts;
 
         console.log(
@@ -690,9 +692,10 @@ function loadProductsFromSpreadsheet() {
   });
 }
 
-/* =================================
-   INITIALIZE
-================================= */
+
+// ------------------------------
+// Initialize
+// ------------------------------
 
 document.addEventListener("DOMContentLoaded", async function () {
   await loadProductsFromSpreadsheet();
@@ -700,5 +703,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   populateFilterOptions();
   setupFilters();
   setupModal();
+  setupImageGallery();
   renderCatalog();
 });
