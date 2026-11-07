@@ -297,13 +297,49 @@
 
       <div class="modal-body">
 
-        <div class="modal-image-wrapper">
-          <img
-            id="modalImg"
-            src=""
-            alt="Product image"
-          >
-        </div>
+
+<div class="modal-image-wrapper">
+
+  <div class="modal-gallery-main">
+
+    <button
+      type="button"
+      id="modalImagePrev"
+      class="modal-gallery-arrow"
+      aria-label="Previous image"
+    >
+      &#10094;
+    </button>
+
+    <img
+      id="modalImg"
+      src=""
+      alt="Product image"
+    >
+
+    <button
+      type="button"
+      id="modalImageNext"
+      class="modal-gallery-arrow"
+      aria-label="Next image"
+    >
+      &#10095;
+    </button>
+
+  </div>
+
+  <div
+    id="modalImageThumbnails"
+    class="modal-gallery-thumbnails"
+  ></div>
+
+  <p
+    id="modalImagePosition"
+    class="modal-gallery-position"
+  ></p>
+
+</div>
+
 
         <div class="modal-details-wrapper">
 
