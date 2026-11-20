@@ -1114,3 +1114,34 @@ select:focus-visible {
     height: 52px;
   }
 }
+
+/* FIX: Product image gallery */
+.modal-image-wrapper {
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  max-height: none !important;
+  min-height: 420px;
+}
+
+.modal-gallery-main {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.modal-gallery-thumbnails {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.modal-gallery-position {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+@media (max-width: 680px) {
+  .modal-image-wrapper {
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+}
